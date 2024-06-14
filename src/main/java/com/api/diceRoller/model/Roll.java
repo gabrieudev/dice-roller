@@ -1,6 +1,6 @@
-package com.api.dice_roller.model;
+package com.api.diceRoller.model;
 
-import com.api.dice_roller.model.enums.DiceType;
+import com.api.diceRoller.model.enums.DiceType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

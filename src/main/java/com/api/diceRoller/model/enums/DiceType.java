@@ -1,4 +1,4 @@
-package com.api.dice_roller.model.enums;
+package com.api.diceRoller.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

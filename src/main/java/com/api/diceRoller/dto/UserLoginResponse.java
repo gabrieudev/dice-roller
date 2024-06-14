@@ -1,4 +1,4 @@
-package com.api.dice_roller.dto;
+package com.api.diceRoller.dto;
 
 public record UserLoginResponse(String token, Long expiresIn) {
 }

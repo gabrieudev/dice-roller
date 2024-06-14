@@ -1,4 +1,4 @@
-package com.api.dice_roller;
+package com.api.diceRoller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

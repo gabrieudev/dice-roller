@@ -1,6 +1,6 @@
-package com.api.dice_roller.dto;
+package com.api.diceRoller.dto;
 
-import com.api.dice_roller.model.enums.DiceType;
+import com.api.diceRoller.model.enums.DiceType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;

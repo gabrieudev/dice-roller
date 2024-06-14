@@ -1,4 +1,4 @@
-package com.api.dice_roller;
+package com.api.diceRoller;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.api.dice_roller.model;
+package com.api.diceRoller.model;
 
 import jakarta.persistence.*;
 import lombok.*;
