@@ -24,8 +24,7 @@ public class RollController {
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     public ResponseEntity<ResultDTO> save(@Valid @RequestBody RollDTO rollDTO) {
-        rollService.save(rollDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(rollService.save(rollDTO));
     }
 
     @GetMapping("/{id}")

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -74,6 +75,7 @@ public class RollService {
     public ResultDTO save(RollDTO rollDTO) {
         int result = generateResult(rollDTO);
         rollDTO.setResult(result);
+        rollDTO.setTimestamp(Instant.now());
         Roll roll = mappingService.toModel(rollDTO);
         rollRepository.save(roll);
         return new ResultDTO(result);
