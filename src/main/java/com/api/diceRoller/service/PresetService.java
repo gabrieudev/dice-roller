@@ -1,6 +1,7 @@
 package com.api.diceRoller.service;
 
 import com.api.diceRoller.dto.PresetDTO;
+import com.api.diceRoller.dto.ResultDTO;
 import com.api.diceRoller.dto.RollDTO;
 import com.api.diceRoller.exception.EntityNotFoundException;
 import com.api.diceRoller.model.Preset;
@@ -81,12 +82,13 @@ public class PresetService {
      * @param presetId the preset's id
      * @return the result
      */
-    public int generateResult(Long presetId) {
+    public ResultDTO generateResult(Long presetId) {
         Preset preset = presetRepository.findById(presetId).orElseThrow(
                 () -> new EntityNotFoundException("Preset not found")
         );
         RollDTO rollDTO = mappingService.toDto(preset.getRoll());
-        return rollService.generateResult(rollDTO);
+        int result = rollService.generateResult(rollDTO);
+        return new ResultDTO(result);
     }
 
     /**

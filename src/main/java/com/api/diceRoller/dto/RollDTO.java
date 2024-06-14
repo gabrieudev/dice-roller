@@ -31,6 +31,8 @@ public class RollDTO {
     @NotNull
     private boolean disadvantage;
 
+    private int result;
+
     private Instant timestamp;
 
 }

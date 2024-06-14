@@ -1,5 +1,6 @@
 package com.api.diceRoller.service;
 
+import com.api.diceRoller.dto.ResultDTO;
 import com.api.diceRoller.dto.RollDTO;
 import com.api.diceRoller.exception.EntityNotFoundException;
 import com.api.diceRoller.model.Roll;
@@ -70,9 +71,12 @@ public class RollService {
      *
      * @param rollDTO the roll's DTO
      */
-    public void save(RollDTO rollDTO) {
+    public ResultDTO save(RollDTO rollDTO) {
+        int result = generateResult(rollDTO);
+        rollDTO.setResult(result);
         Roll roll = mappingService.toModel(rollDTO);
         rollRepository.save(roll);
+        return new ResultDTO(result);
     }
 
     /**

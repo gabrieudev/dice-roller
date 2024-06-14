@@ -40,6 +40,9 @@ public class Roll {
     private boolean disadvantage;
 
     @Column(nullable = false)
+    private int result;
+
+    @Column(nullable = false)
     private Instant timestamp;
 
 }
