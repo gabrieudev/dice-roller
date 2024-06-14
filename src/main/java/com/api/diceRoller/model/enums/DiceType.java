@@ -6,14 +6,14 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum DiceType {
-    d2("d2"),
-    d4("d4"),
-    d6("d6"),
-    d8("d8"),
-    d10("d10"),
-    d12("d12"),
-    d20("d20"),
-    d100("d100");
+    D2(2),
+    D4(4),
+    D6(6),
+    D8(8),
+    D10(10),
+    D12(12),
+    D20(20),
+    D100(100);
 
-    private String type;
+    private final int sides;
 }

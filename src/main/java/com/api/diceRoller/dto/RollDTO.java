@@ -20,7 +20,7 @@ public class RollDTO {
     private int quantity;
 
     @NotNull
-    private DiceType diceType;
+    private DiceType DiceType;
 
     @NotNull
     private int modifier;
