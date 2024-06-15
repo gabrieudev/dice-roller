@@ -8,6 +8,8 @@ import com.api.diceRoller.model.User;
 import com.api.diceRoller.repository.CheckerUserRepository;
 import com.api.diceRoller.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -160,12 +162,12 @@ public class UserService {
     /**
      * retrieves all the users
      *
-     * @return the List of users
+     * @return the Page of users
      */
-    public List<UserDTO> getAll() {
-        return userRepository.findAll().stream().map(
+    public Page<UserDTO> getAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(
                 user -> mappingService.toDto(user)
-        ).toList();
+        );
     }
 
 }

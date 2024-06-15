@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -52,10 +53,10 @@ public class RollController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/reroll/{rollId}")
+    @GetMapping("/history/{userId}")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<ResultDTO> reroll(@PathVariable("rollId") Long rollId) {
-        return ResponseEntity.status(HttpStatus.OK).body(rollService.reroll(rollId));
+    public ResponseEntity<List<RollDTO>> getHistory(@PathVariable("userId")UUID userId, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(rollService.getHistory(userId, pageable).getContent());
     }
 
 }

@@ -4,23 +4,25 @@ import com.api.diceRoller.dto.ResultDTO;
 import com.api.diceRoller.dto.RollDTO;
 import com.api.diceRoller.exception.EntityNotFoundException;
 import com.api.diceRoller.model.Roll;
+import com.api.diceRoller.model.User;
 import com.api.diceRoller.repository.RollRepository;
+import com.api.diceRoller.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class RollService {
 
     @Autowired
     private RollRepository rollRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private MappingService mappingService;
@@ -87,28 +89,6 @@ public class RollService {
     }
 
     /**
-     * rolls an existing roll again
-     *
-     * @param rollId the roll's id
-     * @return the result
-     * @throws EntityNotFoundException if roll is not found
-     */
-    public ResultDTO reroll(Long rollId) {
-        Roll roll = rollRepository.findById(rollId).orElseThrow(
-                () -> new EntityNotFoundException("Roll not found with this id: " + rollId)
-        );
-        roll.setId(null);
-        List<Integer> result = generateResult(mappingService.toDto(roll));
-        int total = result.stream().mapToInt(
-                Integer::intValue
-        ).sum() + roll.getModifier();
-        roll.setResult(total);
-        roll.setTimestamp(Instant.now());
-        rollRepository.save(roll);
-        return new ResultDTO(result, roll.getModifier(), total);
-    }
-
-    /**
      * Updates a roll
      *
      * @param id the roll's id
@@ -136,6 +116,21 @@ public class RollService {
                 () -> new EntityNotFoundException("Roll not found with this id: " + id)
         );
         rollRepository.delete(roll);
+    }
+
+    /**
+     * retrieves the history of user rolls
+     *
+     * @param userId the user's id
+     * @return the Page of rolls
+     */
+    public Page<RollDTO> getHistory(UUID userId, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User not found with this id: " + userId)
+        );
+        return rollRepository.findByUserOrderByTimestampDesc(user, pageable).map(
+                roll -> mappingService.toDto(roll)
+        );
     }
 
     /**

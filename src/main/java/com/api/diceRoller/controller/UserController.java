@@ -5,12 +5,10 @@ import com.api.diceRoller.service.TokenService;
 import com.api.diceRoller.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -34,23 +32,8 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getAll());
-    }
-
-    @PutMapping("/update-password/{email}/{password}/{newPassword}")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<Void> updatePassword(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable("email") String email,
-            @PathVariable("password") String password,
-            @PathVariable("newPassword") String newPassword
-    ) {
-        if (tokenService.notBelongs(jwt, email)) {
-            throw new AccessDeniedException("You don't have access to this");
-        }
-        userService.updatePassword(email, password, newPassword);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<List<UserDTO>> getAll(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAll(pageable).getContent());
     }
 
     @PostMapping("/check/{userId}/{verificationId}")
