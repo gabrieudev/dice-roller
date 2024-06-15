@@ -32,16 +32,4 @@ public class MappingService {
         modelMapper.map(rollDTO, roll);
     }
 
-    public Preset toModel(PresetDTO presetDTO) {
-        return modelMapper.map(presetDTO, Preset.class);
-    }
-
-    public PresetDTO toDto(Preset preset) {
-        return modelMapper.map(preset, PresetDTO.class);
-    }
-
-    public void toModel(PresetDTO presetDTO, Preset preset) {
-        modelMapper.map(presetDTO, preset);
-    }
-
 }

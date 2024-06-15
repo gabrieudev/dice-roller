@@ -82,6 +82,25 @@ public class RollService {
     }
 
     /**
+     * rerolls an existing roll
+     *
+     * @param rollId the roll's id
+     * @return the result
+     * @throws EntityNotFoundException if roll is not found
+     */
+    public ResultDTO reroll(Long rollId) {
+        Roll roll = rollRepository.findById(rollId).orElseThrow(
+                () -> new EntityNotFoundException("Roll not found with this id: " + rollId)
+        );
+        roll.setId(null);
+        int result = generateResult(mappingService.toDto(roll));
+        roll.setResult(result);
+        roll.setTimestamp(Instant.now());
+        rollRepository.save(roll);
+        return new ResultDTO(result);
+    }
+
+    /**
      * Updates a roll
      *
      * @param id the roll's id

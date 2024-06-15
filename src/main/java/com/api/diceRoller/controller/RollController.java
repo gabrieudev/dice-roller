@@ -52,5 +52,11 @@ public class RollController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @GetMapping("/reroll/{rollId}")
+    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+    public ResponseEntity<ResultDTO> reroll(@PathVariable("rollId") Long rollId) {
+        return ResponseEntity.status(HttpStatus.OK).body(rollService.reroll(rollId));
+    }
+
 }
 
