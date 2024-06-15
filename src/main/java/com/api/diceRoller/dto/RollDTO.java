@@ -1,7 +1,7 @@
 package com.api.diceRoller.dto;
 
-import com.api.diceRoller.model.enums.DiceType;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,10 +17,12 @@ public class RollDTO {
     private UserDTO user;
 
     @NotNull
+    @Positive
     private int quantity;
 
     @NotNull
-    private DiceType DiceType;
+    @Positive
+    private int sides;
 
     @NotNull
     private int modifier;

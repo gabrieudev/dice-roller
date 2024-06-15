@@ -1,6 +1,5 @@
 package com.api.diceRoller.model;
 
-import com.api.diceRoller.model.enums.DiceType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,9 +25,8 @@ public class Roll {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(name = "dice_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private DiceType diceType;
+    @Column(nullable = false)
+    private int sides;
 
     @Column(nullable = false)
     private int modifier;

@@ -1,4 +1,6 @@
 package com.api.diceRoller.dto;
 
-public record ResultDTO(int result) {
+import java.util.List;
+
+public record ResultDTO(List<Integer> result, int modifier, int total) {
 }

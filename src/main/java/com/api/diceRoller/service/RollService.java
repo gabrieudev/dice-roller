@@ -11,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -29,29 +31,29 @@ public class RollService {
      * @param rollDTO the roll's DTO
      * @return the result
      */
-    public int generateResult(RollDTO rollDTO) {
+    public List<Integer> generateResult(RollDTO rollDTO) {
         Random random = new Random();
-        int result = 0;
+        List<Integer> result = new ArrayList<>();
         // array used to store roll results with advantage or disadvantage
         int[] results = new int[2];
         if (rollDTO.isAdvantage() && !rollDTO.isDisadvantage()) {
             for (int i = 0 ; i < rollDTO.getQuantity() ; i++) {
-                results[0] = random.nextInt(rollDTO.getDiceType().getSides()) + 1;
-                results[1] = random.nextInt(rollDTO.getDiceType().getSides()) + 1;
-                result += Arrays.stream(results).max().getAsInt();
+                results[0] = random.nextInt(rollDTO.getSides()) + 1;
+                results[1] = random.nextInt(rollDTO.getSides()) + 1;
+                result.add(Arrays.stream(results).max().getAsInt());
             }
         } else if (rollDTO.isDisadvantage() && !rollDTO.isAdvantage()) {
             for (int i = 0 ; i < rollDTO.getQuantity() ; i++) {
-                results[0] = random.nextInt(rollDTO.getDiceType().getSides()) + 1;
-                results[1] = random.nextInt(rollDTO.getDiceType().getSides()) + 1;
-                result += Arrays.stream(results).min().getAsInt();
+                results[0] = random.nextInt(rollDTO.getSides()) + 1;
+                results[1] = random.nextInt(rollDTO.getSides()) + 1;
+                result.add(Arrays.stream(results).min().getAsInt());
             }
         } else {
             for (int i = 0 ; i < rollDTO.getQuantity() ; i++) {
-                result += random.nextInt(rollDTO.getDiceType().getSides()) + 1;
+                result.add(random.nextInt(rollDTO.getSides()) + 1);
             }
         }
-        return result + rollDTO.getModifier();
+        return result;
     }
 
     /**
@@ -73,16 +75,19 @@ public class RollService {
      * @param rollDTO the roll's DTO
      */
     public ResultDTO save(RollDTO rollDTO) {
-        int result = generateResult(rollDTO);
-        rollDTO.setResult(result);
+        List<Integer> result = generateResult(rollDTO);
+        int total = result.stream().mapToInt(
+                Integer::intValue
+        ).sum() + rollDTO.getModifier();
+        rollDTO.setResult(total);
         rollDTO.setTimestamp(Instant.now());
         Roll roll = mappingService.toModel(rollDTO);
         rollRepository.save(roll);
-        return new ResultDTO(result);
+        return new ResultDTO(result, roll.getModifier(), total);
     }
 
     /**
-     * rerolls an existing roll
+     * rolls an existing roll again
      *
      * @param rollId the roll's id
      * @return the result
@@ -93,11 +98,14 @@ public class RollService {
                 () -> new EntityNotFoundException("Roll not found with this id: " + rollId)
         );
         roll.setId(null);
-        int result = generateResult(mappingService.toDto(roll));
-        roll.setResult(result);
+        List<Integer> result = generateResult(mappingService.toDto(roll));
+        int total = result.stream().mapToInt(
+                Integer::intValue
+        ).sum() + roll.getModifier();
+        roll.setResult(total);
         roll.setTimestamp(Instant.now());
         rollRepository.save(roll);
-        return new ResultDTO(result);
+        return new ResultDTO(result, roll.getModifier(), total);
     }
 
     /**
