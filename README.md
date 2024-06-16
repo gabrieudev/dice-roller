@@ -78,7 +78,6 @@ User:
 - `POST /users/register`: Register a user.
 - `POST /login`: Log in and receive a JWT.
 - `ADMIN Role` `GET /users`: Get all users.
-- `BASIC Role` `PUT /users/update-password`: Update a user's password.
 - `POST /users/check/{userId}/{verificationId}`: Verify if the verification code sent to the email is correct.
 
 Access the complete documentation at the `/swagger-ui.html` endpoint.
