@@ -89,23 +89,6 @@ public class RollService {
     }
 
     /**
-     * Updates a roll
-     *
-     * @param id the roll's id
-     * @param rollDTO the roll's DTO
-     * @return the updated roll's DTO
-     * @throws EntityNotFoundException if id is not found
-     */
-    public RollDTO update(Long id, RollDTO rollDTO) {
-        Roll roll = rollRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Roll not found with this id: " + id)
-        );
-        mappingService.toModel(rollDTO, roll);
-        Roll updatedRoll = rollRepository.save(roll);
-        return mappingService.toDto(updatedRoll);
-    }
-
-    /**
      * Deletes a roll by its id
      *
      * @param id the roll's id

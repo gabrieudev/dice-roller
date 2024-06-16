@@ -40,12 +40,6 @@ public class RollController {
         return ResponseEntity.status(HttpStatus.OK).body(rollService.getAll(pageable).getContent());
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<RollDTO> update(@PathVariable("id") Long id, @Valid @RequestBody RollDTO rollDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(rollService.update(id, rollDTO));
-    }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
