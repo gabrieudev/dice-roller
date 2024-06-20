@@ -12,8 +12,8 @@ public class MappingService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public User toModel(UserDTO userDTO) {
-        return modelMapper.map(userDTO, User.class);
+    public User toModel(RegisterDTO registerDTO) {
+        return modelMapper.map(registerDTO, User.class);
     }
 
     public UserDTO toDto(User user) {
@@ -26,10 +26,6 @@ public class MappingService {
 
     public RollDTO toDto(Roll roll) {
         return modelMapper.map(roll, RollDTO.class);
-    }
-
-    public void toModel(RollDTO rollDTO, Roll roll) {
-        modelMapper.map(rollDTO, roll);
     }
 
 }

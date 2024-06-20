@@ -14,7 +14,7 @@ public class SwaggerConfig {
     public OpenAPI diceRollerOpenAPI(){
         return new OpenAPI()
                 .info(new Info().title("Dice Roller REST API")
-                        .description("REST API for Dice Roller")
+                        .description("REST API for dice rolling")
                         .version("v0.0.1")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()

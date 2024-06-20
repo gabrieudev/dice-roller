@@ -1,7 +1,6 @@
 package com.api.diceRoller.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import com.api.diceRoller.model.Role;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,22 +14,18 @@ public class UserDTO {
 
     private UUID id;
 
-    @NotBlank
     private String name;
 
-    @NotBlank
-    @Email
     private String email;
 
-    @NotBlank
     private String password;
 
-    private Set<String> roles;
+    private Set<Role> roles;
 
     private Instant createdAt;
 
     private Instant updatedAt;
 
-    private boolean isChecked;
+    private boolean enabled;
 
 }

@@ -3,9 +3,11 @@ package com.api.diceRoller.service;
 import com.api.diceRoller.dto.*;
 import com.api.diceRoller.exception.EntityNotFoundException;
 import com.api.diceRoller.exception.UserAlreadyExistsException;
-import com.api.diceRoller.model.CheckerUser;
+import com.api.diceRoller.model.ConfirmationToken;
+import com.api.diceRoller.model.Role;
 import com.api.diceRoller.model.User;
-import com.api.diceRoller.repository.CheckerUserRepository;
+import com.api.diceRoller.repository.ConfirmationTokenRepository;
+import com.api.diceRoller.repository.RoleRepository;
 import com.api.diceRoller.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,9 +16,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,7 +25,19 @@ import java.util.UUID;
 public class UserService {
 
     @Autowired
+    private MappingService mappingService;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -32,138 +45,78 @@ public class UserService {
     @Autowired
     private TokenService tokenService;
 
-    @Autowired
-    private MappingService mappingService;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private CheckerUserRepository checkerUserRepository;
-
-    /**
-     * log in a user and return a JWT
-     *
-     * @param userLoginRequest request of user
-     * @return response of user
-     * @throws BadCredentialsException if any of the credentials are invalid
-     */
-    public UserLoginResponse login(UserLoginRequest userLoginRequest) {
-        Optional<User> userOptional = userRepository.findByEmail(userLoginRequest.email());
-
-        userOptional.orElseThrow(
-                () -> new BadCredentialsException("Email is invalid")
-        );
-        if (!bCryptPasswordEncoder.matches(userLoginRequest.password(), userOptional.get().getPassword())) {
-            throw new BadCredentialsException("Password is invalid");
+    public void register(RegisterDTO registerDTO) {
+        if (userRepository.existsByEmail(registerDTO.getEmail())) {
+            throw new UserAlreadyExistsException("User already exists");
         }
 
-        String token = tokenService.generateToken(userOptional.get());
-
-        return new UserLoginResponse(token, 300L);
-    }
-
-    /**
-     * register a new user and send confirmation email
-     *
-     * @param userDTO the user's DTO
-     * @return the saved user
-     * @throws UserAlreadyExistsException if the user already exists
-     */
-    public User register(UserDTO userDTO) {
-
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new UserAlreadyExistsException("Email already exists");
-        }
-
-        User user = mappingService.toModel(userDTO);
-
-        user.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
-        user.setRoles(Set.of("BASIC"));
+        User user = mappingService.toModel(registerDTO);
+        Role role = roleRepository.findById(2L).orElseThrow();
+        user.setPassword(bCryptPasswordEncoder.encode(registerDTO.getPassword()));
+        user.setEnabled(false);
+        user.setRoles(Set.of(role));
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
-        user.setChecked(false);
-
-        CheckerUser checkerUser = new CheckerUser();
-        checkerUser.setUser(user);
-        checkerUser.setExpiresAt(Instant.now().plusSeconds(600));
-
-        User savedUser = userRepository.save(user);
-
-        CheckerUser savedCheckerUser = checkerUserRepository.save(checkerUser);
-
-        emailService.sendEmail(new Email(
-                user.getEmail(),
-                "Dice Roller email verification",
-                "The code to verify your e-mail is " + savedCheckerUser.getId()));
-
-        return savedUser;
-
-    }
-
-    /**
-     * checks the id sent to the user's email
-     *
-     * @param userId the user's id
-     * @param verificationId the verification's id
-     * @throws EntityNotFoundException if user or checkerUser is not found
-     * @throws AccessDeniedException if ids are different or code has expired
-     */
-    public void check(UUID userId, UUID verificationId) {
-
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User not found")
-        );
-
-        CheckerUser checkerUser = checkerUserRepository.findByUser(user).orElseThrow(
-                () -> new EntityNotFoundException("Code not send")
-        );
-
-        if (!verificationId.equals(checkerUser.getId())) {
-            throw new AccessDeniedException("Invalid code");
-        }
-        if (checkerUser.getExpiresAt().isBefore(Instant.now())) {
-            throw new AccessDeniedException("Code expired");
-        }
-
-        user.setChecked(true);
-        checkerUserRepository.delete(checkerUser);
         userRepository.save(user);
 
-    }
+        ConfirmationToken confirmationToken = new ConfirmationToken();
+        confirmationToken.setUser(user);
+        confirmationToken.setToken(UUID.randomUUID().toString());
+        confirmationToken.setCreatedAt(Instant.now());
+        confirmationToken.setExpiresAt(Instant.now().plusSeconds(600));
+        confirmationTokenRepository.save(confirmationToken);
 
-    /**
-     * update user's password
-     *
-     * @param email the user's email
-     * @param password the user's password
-     * @param newPassword the user's new password
-     * @return the updated user
-     * @throws EntityNotFoundException if user not found
-     * @throws BadCredentialsException if password is invalid
-     */
-    public User updatePassword(String email, String password, String newPassword) {
-
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User not found")
+        String link = "http://localhost:8080/api/users/confirm?token=" + confirmationToken.getToken();
+        Email email = new Email(
+                user.getEmail(),
+                "Email confirm",
+                "Link to confirm your registration: " + link
         );
-
-        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException("Password is invalid");
-        }
-
-        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-        user.setUpdatedAt(Instant.now());
-
-        return userRepository.save(user);
-
+        emailService.send(email);
     }
 
-    /**
-     * retrieves all the users
-     *
-     * @return the Page of users
-     */
+    public TokenDTO login(LoginDTO loginDTO) {
+        User user = userRepository.findByEmail(loginDTO.email()).orElseThrow(
+                () -> new BadCredentialsException("Invalid email")
+        );
+        if (!bCryptPasswordEncoder.matches(loginDTO.password(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
+        }
+        String token = tokenService.generateToken(user);
+        return new TokenDTO(token, Instant.now().plusSeconds(300));
+    }
+
+    public void confirmEmail(String token, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User not found with this id: " + userId)
+        );
+        ConfirmationToken confirmationToken = confirmationTokenRepository.findByUser(user).orElseThrow(
+                () -> new EntityNotFoundException("Token not found")
+        );
+        if (confirmationToken.getExpiresAt().isBefore(Instant.now())) {
+            throw new AccessDeniedException("Token expired");
+        }
+        if (!confirmationToken.getToken().equals(token)) {
+            throw new AccessDeniedException("Invalid token");
+        }
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    public UserDTO getById(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User not found with this id: " + userId)
+        );
+        return mappingService.toDto(user);
+    }
+
+    public void delete(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User not found with this id: " + userId)
+        );
+        userRepository.delete(user);
+    }
+
     public Page<UserDTO> getAll(Pageable pageable) {
         return userRepository.findAll(pageable).map(
                 user -> mappingService.toDto(user)

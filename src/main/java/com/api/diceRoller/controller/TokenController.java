@@ -1,7 +1,8 @@
 package com.api.diceRoller.controller;
 
-import com.api.diceRoller.dto.UserLoginRequest;
-import com.api.diceRoller.dto.UserLoginResponse;
+import com.api.diceRoller.dto.LoginDTO;
+import com.api.diceRoller.dto.RegisterDTO;
+import com.api.diceRoller.dto.TokenDTO;
 import com.api.diceRoller.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +12,21 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class TokenController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.login(userLoginRequest));
+    @PostMapping("/login")
+    public ResponseEntity<TokenDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.login(loginDTO));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterDTO registerDTO) {
+        userService.register(registerDTO);
+        return ResponseEntity.status(HttpStatus.OK).body("User registered successfully");
     }
 
 }
