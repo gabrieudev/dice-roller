@@ -70,10 +70,12 @@ Roll:
 
 User:
 
-- `POST /users/register`: Registra um usuário.
-- `POST /login`: Realiza o login e recebe um JWT.
+- `POST /auth/register`: Registra um usuário e envia um link para confirmação ao seu email.
+- `GET /users/confirm`: Faz a verificação do email.
+- `POST /auth/login`: Realiza o login e recebe um JWT.
 - `ADMIN Role` `GET /users`: Obtém todos usuários.
-- `POST /users/check/{userId}/{verificationId}`: Verifica se o código de verificação enviado ao email é correto.
+- `ADMIN Role` `DELETE /users/{userId}`: Deleta um usuário.
+- `BASIC Role` `GET /users/{userId}`: Obtém um usuário de acordo com o ID.
 
 Acesse a documentação completa no endpoint `/swagger-ui.html`
 
